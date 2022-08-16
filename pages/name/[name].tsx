@@ -51,7 +51,7 @@ const PokemonByNamePage: NextPage<Props>=({ pokemon}) => {
                                 ghost={ !isInFavorites }
                                 onClick={onToggleFavorites}
                             >
-                                { isInFavorites ? ' En Favoritos ':' Gardar en favoritos' }
+                                { isInFavorites ? ' En Favoritos ':' Guardar en favoritos' }
                                 
                             </Button>
                         </Card.Header>
@@ -99,17 +99,28 @@ export const getStaticPaths : GetStaticPaths = async (ctx) =>{
         paths: pokemonsName.map( name => ({
             params:{ name }
         }) ) ,
-        fallback:false
+        fallback:'blocking'
 
     }
 }
 export const getStaticProps : GetStaticProps = async (ctx)=>{
     const { params } = ctx
     const  { name } = params as { name :string }
+    const pokemon = await getPokemonInfo(name)
+
+    if( !pokemon ){
+        return {
+            redirect :{
+                destination :'/',
+                permanent:false
+            }
+        }
+    }
     return {
         props:{
-            pokemon: await getPokemonInfo(name)
-        }
+            pokemon
+        },
+        revalidate: 86400,
     }
 }
 export default PokemonByNamePage
